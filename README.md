@@ -14,24 +14,29 @@ npm run dev
 
 Admin paneli şifresi `.env.local` dosyasındaki `ADMIN_PASSWORD` değişkenidir. Varsayılan: `admin123`
 
-## GitHub Pages'e Yükleme
+## GitHub Pages'e Yükleme (Repo Adı: `ai-blog`)
 
-1. **GitHub'da bir repo oluşturun** (örneğin: `portfolio`).
-2. **`next.config.ts` dosyasını güncelleyin**:
-   - `output: "export"` satırının yorumunu kaldırın.
-   - Eğer reponuzun adı `huseyin.github.io` değilse (yani alt klasörde çalışacaksa), `basePath: "/portfolio"` satırının yorumunu kaldırın (`/portfolio` kısmını kendi repo adınızla değiştirin).
-3. **Kodu GitHub'a push edin**:
+1. **GitHub'da `ai-blog` adında bir repo oluşturun.**
+2. **Kodu GitHub'a push edin**:
    ```bash
-   git init
-   git add .
-   git commit -m "ilk blog sürümü"
-   git remote add origin https://github.com/huseyin/portfolio.git
+   git remote add origin https://github.com/TurkishCodeMan/ai-blog.git
+   git branch -M main
    git push -u origin main
    ```
-4. **GitHub Actions Kurulumu**:
+3. **GitHub Ayarları**:
    - `Settings > Pages` kısmına gidin.
-   - `Build and deployment > Source` kısmını `GitHub Actions` olarak seçin.
-   - Proje içindeki `.github/workflows/deploy.yml` dosyası otomatik olarak build alıp deploy edecektir.
+   - **Build and deployment > Source** kısmından **GitHub Actions** seçeneğini seçin.
+   - (Workflow dosyası `.github/workflows/deploy.yml` olduğu için otomatik algılanacaktır).
+
+## Önemli: Localhost Adresi Değişti!
+
+`next.config.ts` içinde `basePath: "/ai-blog"` ayarını açtığımız için, yerel geliştirme ortamında adresiniz değişti:
+
+- **Eski:** `http://localhost:3000`
+- **Yeni:** `http://localhost:3000/ai-blog`
+- **Admin:** `http://localhost:3000/ai-blog/admin`
+
+Eğer `/ai-blog` olmadan girmeye çalışırsanız **404 hatası** alırsınız.
 
 ## Admin Paneli Nasıl Çalışır?
 

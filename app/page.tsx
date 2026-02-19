@@ -3,7 +3,7 @@ import PostCard from "../components/PostCard";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "Hüseyin ALTIKULAÇ's Blog",
   description: "Düşünceler, teknoloji ve deneyimler",
 };
 
