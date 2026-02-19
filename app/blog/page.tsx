@@ -1,41 +1,41 @@
-import { getPostBySlug, getAllPosts } from "@/lib/posts";
-import { notFound } from "next/navigation";
+"use client";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { getPostBySlug, Post } from "@/lib/posts";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import type { Metadata } from "next";
 import Link from "next/link";
 
-export async function generateStaticParams() {
-  const posts = getAllPosts();
-  return posts.map((p) => ({ slug: p.slug }));
-}
+function BlogPost() {
+  const searchParams = useSearchParams();
+  const slug = searchParams.get("slug") ?? "";
+  const [post, setPost] = useState<Post | null | undefined>(undefined);
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-  const post = getPostBySlug(slug);
-  if (!post) return {};
-  return {
-    title: post.title,
-    description: post.excerpt,
-  };
-}
+  useEffect(() => {
+    const target = slug || "__nonexistent__";
+    getPostBySlug(target).then((data) => setPost(data ?? null));
+  }, [slug]);
 
-export default async function BlogPostPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const post = getPostBySlug(slug);
-  if (!post || !post.published) notFound();
+  if (post === undefined) {
+    return (
+      <div style={{ maxWidth: 760, margin: "0 auto", padding: "3rem 1.5rem", textAlign: "center", color: "var(--text-muted)" }}>
+        Yükleniyor...
+      </div>
+    );
+  }
+
+  if (!post || !post.published) {
+    return (
+      <div style={{ maxWidth: 760, margin: "0 auto", padding: "3rem 1.5rem", textAlign: "center", color: "var(--text-muted)" }}>
+        <p style={{ fontSize: "2rem" }}>404</p>
+        <p>Yazı bulunamadı.</p>
+        <Link href="/" style={{ color: "var(--accent)" }}>Ana sayfaya dön</Link>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: 760, margin: "0 auto", padding: "3rem 1.5rem" }}>
-      {/* Back link */}
       <Link
         href="/"
         className="fade-up"
@@ -53,9 +53,7 @@ export default async function BlogPostPage({
         ← Geri dön
       </Link>
 
-      {/* Header */}
       <div className="fade-up fade-up-delay-1" style={{ marginBottom: "2.5rem" }}>
-        {/* Tags */}
         <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginBottom: "1rem" }}>
           {post.tags.map((tag) => (
             <span
@@ -101,16 +99,26 @@ export default async function BlogPostPage({
         </p>
       </div>
 
-      {/* Divider */}
       <div
         className="fade-up fade-up-delay-2"
         style={{ borderTop: "1px solid var(--border)", marginBottom: "2.5rem" }}
       />
 
-      {/* Content */}
       <div className="prose fade-up fade-up-delay-2">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
       </div>
     </div>
+  );
+}
+
+export default function BlogPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ maxWidth: 760, margin: "0 auto", padding: "3rem 1.5rem", textAlign: "center", color: "var(--text-muted)" }}>
+        Yükleniyor...
+      </div>
+    }>
+      <BlogPost />
+    </Suspense>
   );
 }

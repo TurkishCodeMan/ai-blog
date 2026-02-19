@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   output: "export",
   basePath: "/ai-blog",
   images: { unoptimized: true },
+  trailingSlash: true,
 };
 
 export default nextConfig;
+
+
+

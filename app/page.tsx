@@ -1,14 +1,17 @@
-import { getAllPosts } from "../lib/posts";
+"use client";
+import { useEffect, useState } from "react";
+import { getAllPosts, Post } from "../lib/posts";
 import PostCard from "../components/PostCard";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Hüseyin ALTIKULAÇ's Blog",
-  description: "Düşünceler, teknoloji ve deneyimler",
-};
 
 export default function HomePage() {
-  const posts = getAllPosts();
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getAllPosts()
+      .then(setPosts)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div style={{ maxWidth: 760, margin: "0 auto", padding: "3rem 1.5rem" }}>
@@ -35,7 +38,11 @@ export default function HomePage() {
       <div style={{ borderTop: "1px solid var(--border)", marginBottom: "2.5rem" }} />
 
       {/* Post list */}
-      {posts.length === 0 ? (
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "4rem 2rem", color: "var(--text-muted)" }}>
+          Yazılar yükleniyor...
+        </div>
+      ) : posts.length === 0 ? (
         <div
           className="fade-up"
           style={{
@@ -52,10 +59,7 @@ export default function HomePage() {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {posts.map((post, i) => (
-            <div
-              key={post.slug}
-              className={`fade-up fade-up-delay-${Math.min(i + 1, 3)}`}
-            >
+            <div key={post.slug} className={`fade-up fade-up-delay-${Math.min(i + 1, 3)}`}>
               <PostCard post={post} />
             </div>
           ))}

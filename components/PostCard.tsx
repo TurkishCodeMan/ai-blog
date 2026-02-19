@@ -5,7 +5,7 @@ import { Post } from "@/lib/posts";
 export default function PostCard({ post }: { post: Post }) {
   return (
     <Link
-      href={`/blog/${post.slug}`}
+      href={`/blog?slug=${post.slug}`}
       style={{ textDecoration: "none", display: "block" }}
     >
       <article
