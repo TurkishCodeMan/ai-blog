@@ -1,6 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+const ADMIN_PASSWORD = "admin123";
 
 export default function LoginPage() {
   const [password, setPassword] = useState("");
@@ -9,10 +11,12 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd call an API. 
-    // Here we just save it to sessionStorage for simplicity.
-    sessionStorage.setItem("admin-token", password);
-    router.push("/admin");
+    if (password === ADMIN_PASSWORD) {
+      sessionStorage.setItem("admin-token", password);
+      router.push("/admin");
+    } else {
+      setError("Hatalı şifre. Lütfen tekrar deneyin.");
+    }
   };
 
   return (
@@ -25,6 +29,7 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={{ padding: "0.75rem", borderRadius: 8, border: "1px solid var(--border)", backgroundColor: "var(--bg)", color: "#fff" }}
+          autoFocus
         />
         {error && <p style={{ color: "var(--danger)", fontSize: "0.8rem" }}>{error}</p>}
         <button
@@ -37,3 +42,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

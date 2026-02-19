@@ -3,84 +3,123 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Post } from "@/lib/posts";
 
+const STORAGE_KEY = "admin-posts";
+const ADMIN_PASSWORD = "admin123";
+
+function loadLocalPosts(): Post[] {
+  if (typeof window === "undefined") return [];
+  const raw = localStorage.getItem(STORAGE_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+function saveLocalPosts(posts: Post[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+}
+
+function slugify(title: string) {
+  return title
+    .toLowerCase()
+    .replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s")
+    .replace(/ı/g, "i").replace(/ö/g, "o").replace(/ç/g, "c")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
 export default function AdminPage() {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
   const [editingPost, setEditingPost] = useState<Partial<Post> | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
   const router = useRouter();
-
-  const fetchPosts = async (token: string) => {
-    try {
-      const res = await fetch("/api/posts", {
-        headers: { "x-admin-token": token },
-      });
-      if (res.status === 401) {
-        router.push("/admin/login");
-        return;
-      }
-      const data = await res.json();
-      setPosts(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     const token = sessionStorage.getItem("admin-token");
-    if (!token) {
+    if (!token || token !== ADMIN_PASSWORD) {
       router.push("/admin/login");
       return;
     }
-    fetchPosts(token);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setAuthenticated(true);
+    setPosts(loadLocalPosts());
   }, [router]);
 
-  const handleDelete = async (slug: string) => {
+  const handleDelete = (slug: string) => {
     if (!confirm("Bu yazıyı silmek istediğinize emin misiniz?")) return;
-    const token = sessionStorage.getItem("admin-token") || "";
-    await fetch(`/api/posts/${slug}`, {
-      method: "DELETE",
-      headers: { "x-admin-token": token },
-    });
-    fetchPosts(token);
+    const updated = posts.filter((p) => p.slug !== slug);
+    setPosts(updated);
+    saveLocalPosts(updated);
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingPost?.title || !editingPost?.content) return;
-    const token = sessionStorage.getItem("admin-token") || "";
-    const method = editingPost.slug ? "PUT" : "POST";
-    const url = editingPost.slug ? `/api/posts/${editingPost.slug}` : "/api/posts";
 
-    const res = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        "x-admin-token": token,
-      },
-      body: JSON.stringify(editingPost),
-    });
+    const isNew = !editingPost.slug;
+    const slug = isNew ? slugify(editingPost.title!) : editingPost.slug!;
+    const now = new Date().toISOString().split("T")[0];
 
-    if (res.ok) {
-      setEditingPost(null);
-      fetchPosts(token);
-    }
+    const post: Post = {
+      slug,
+      title: editingPost.title!,
+      date: editingPost.date || now,
+      excerpt: editingPost.excerpt || "",
+      content: editingPost.content!,
+      tags: editingPost.tags || [],
+      published: editingPost.published ?? true,
+    };
+
+    const updated = isNew
+      ? [post, ...posts]
+      : posts.map((p) => (p.slug === slug ? post : p));
+
+    setPosts(updated);
+    saveLocalPosts(updated);
+    setEditingPost(null);
   };
 
-  if (loading) return <div style={{ padding: "4rem", textAlign: "center" }}>Yükleniyor...</div>;
+  const handleExport = (post: Post) => {
+    const json = JSON.stringify(post, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${post.slug}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportAll = () => {
+    const json = JSON.stringify(posts, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "posts-export.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  if (!authenticated) return null;
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "3rem 1.5rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
         <h1 style={{ fontSize: "2rem", fontWeight: 800, color: "#fff" }}>Admin Paneli</h1>
-        <button
-          onClick={() => setEditingPost({ title: "", content: "", excerpt: "", tags: [], published: true })}
-          style={{ padding: "0.6rem 1.25rem", borderRadius: 8, backgroundColor: "var(--accent)", color: "#fff", border: "none", fontWeight: 600, cursor: "pointer" }}
-        >
-          + Yeni Yazı
-        </button>
+        <div style={{ display: "flex", gap: "0.75rem" }}>
+          <button
+            onClick={handleExportAll}
+            style={{ padding: "0.6rem 1.25rem", borderRadius: 8, backgroundColor: "transparent", color: "var(--text-muted)", border: "1px solid var(--border)", fontWeight: 600, cursor: "pointer" }}
+          >
+            ↓ Tümünü İndir
+          </button>
+          <button
+            onClick={() => setEditingPost({ title: "", content: "", excerpt: "", tags: [], published: true })}
+            style={{ padding: "0.6rem 1.25rem", borderRadius: 8, backgroundColor: "var(--accent)", color: "#fff", border: "none", fontWeight: 600, cursor: "pointer" }}
+          >
+            + Yeni Yazı
+          </button>
+        </div>
+      </div>
+
+      <div style={{ padding: "0.75rem 1rem", borderRadius: 8, backgroundColor: "rgba(255,200,0,0.08)", border: "1px solid rgba(255,200,0,0.2)", marginBottom: "2rem", color: "#ffd666", fontSize: "0.85rem" }}>
+        ℹ️ Bu panel tarayıcı localStorage'ında çalışır. Yazılarınızı JSON olarak indirip <code>content/posts/</code> klasörüne ekleyip push etmeniz gerekir.
       </div>
 
       {editingPost && (
@@ -105,6 +144,14 @@ export default function AdminPage() {
               />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <label style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>Tags (virgülle ayır)</label>
+              <input
+                value={(editingPost.tags || []).join(", ")}
+                onChange={(e) => setEditingPost({ ...editingPost, tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean) })}
+                style={{ padding: "0.75rem", borderRadius: 8, border: "1px solid var(--border)", backgroundColor: "var(--bg)", color: "#fff" }}
+              />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               <label style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>İçerik (Markdown)</label>
               <textarea
                 value={editingPost.content || ""}
@@ -112,6 +159,15 @@ export default function AdminPage() {
                 style={{ padding: "0.75rem", borderRadius: 8, border: "1px solid var(--border)", backgroundColor: "var(--bg)", color: "#fff", minHeight: 300, fontFamily: "monospace" }}
                 required
               />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <input
+                type="checkbox"
+                id="published"
+                checked={editingPost.published ?? true}
+                onChange={(e) => setEditingPost({ ...editingPost, published: e.target.checked })}
+              />
+              <label htmlFor="published" style={{ color: "var(--text-muted)" }}>Yayınlandı</label>
             </div>
             <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
               <button
@@ -132,30 +188,44 @@ export default function AdminPage() {
         </div>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        {posts.map((post) => (
-          <div key={post.slug} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem", borderRadius: 12, border: "1px solid var(--border)", backgroundColor: "var(--bg-card)" }}>
-            <div>
-              <h3 style={{ color: "#fff", fontSize: "1.1rem", marginBottom: "0.25rem" }}>{post.title}</h3>
-              <p style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>{post.date} • {post.published ? "Yayınlandı" : "Taslak"}</p>
+      {posts.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "4rem 2rem", color: "var(--text-muted)", border: "1px dashed var(--border)", borderRadius: 12 }}>
+          <p style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📝</p>
+          <p>Henüz yazı eklemediniz. "Yeni Yazı" ile başlayın!</p>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {posts.map((post) => (
+            <div key={post.slug} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem", borderRadius: 12, border: "1px solid var(--border)", backgroundColor: "var(--bg-card)" }}>
+              <div>
+                <h3 style={{ color: "#fff", fontSize: "1.1rem", marginBottom: "0.25rem" }}>{post.title}</h3>
+                <p style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>{post.date} • {post.published ? "✅ Yayınlandı" : "🔒 Taslak"}</p>
+              </div>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <button
+                  onClick={() => handleExport(post)}
+                  title="JSON olarak indir"
+                  style={{ padding: "0.5rem 1rem", borderRadius: 6, border: "1px solid var(--border)", color: "var(--text-muted)", cursor: "pointer", fontSize: "0.85rem" }}
+                >
+                  ↓ JSON
+                </button>
+                <button
+                  onClick={() => setEditingPost(post)}
+                  style={{ padding: "0.5rem 1rem", borderRadius: 6, border: "1px solid var(--border)", color: "#fff", cursor: "pointer" }}
+                >
+                  Düzenle
+                </button>
+                <button
+                  onClick={() => handleDelete(post.slug)}
+                  style={{ padding: "0.5rem 1rem", borderRadius: 6, border: "1px solid var(--border)", color: "var(--danger)", cursor: "pointer" }}
+                >
+                  Sil
+                </button>
+              </div>
             </div>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              <button
-                onClick={() => setEditingPost(post)}
-                style={{ padding: "0.5rem 1rem", borderRadius: 6, border: "1px solid var(--border)", color: "#fff", cursor: "pointer" }}
-              >
-                Düzenle
-              </button>
-              <button
-                onClick={() => handleDelete(post.slug)}
-                style={{ padding: "0.5rem 1rem", borderRadius: 6, border: "1px solid var(--border)", color: "var(--danger)", cursor: "pointer" }}
-              >
-                Sil
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
