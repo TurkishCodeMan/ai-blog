@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react";
 import { getAllPosts, Post } from "../lib/posts";
 import PostCard from "../components/PostCard";
+import { useLocale } from "../lib/locale-context";
 
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLocale();
 
   useEffect(() => {
     getAllPosts()
@@ -27,10 +29,10 @@ export default function HomePage() {
             lineHeight: 1.15,
           }}
         >
-          Merhaba ✦
+          {t("hero_greeting")}
         </h1>
         <p style={{ color: "var(--text-muted)", fontSize: "1.1rem", maxWidth: 520 }}>
-          Burada teknoloji, yazılım ve düşüncelerimi yazıyorum. Sade, dürüst, doğrudan.
+          {t("hero_subtitle")}
         </p>
       </div>
 
@@ -40,7 +42,7 @@ export default function HomePage() {
       {/* Post list */}
       {loading ? (
         <div style={{ textAlign: "center", padding: "4rem 2rem", color: "var(--text-muted)" }}>
-          Yazılar yükleniyor...
+          {t("loading")}
         </div>
       ) : posts.length === 0 ? (
         <div
@@ -54,7 +56,7 @@ export default function HomePage() {
           }}
         >
           <p style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📝</p>
-          <p>Henüz yayınlanmış bir yazı yok.</p>
+          <p>{t("no_posts")}</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>

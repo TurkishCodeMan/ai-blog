@@ -5,11 +5,14 @@ import { getPostBySlug, Post } from "@/lib/posts";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
+import { useLocale } from "@/lib/locale-context";
 
 function BlogPost() {
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug") ?? "";
   const [post, setPost] = useState<Post | null | undefined>(undefined);
+  const { t, locale } = useLocale();
+  const dateLocale = locale === "tr" ? "tr-TR" : "en-US";
 
   useEffect(() => {
     const target = slug || "__nonexistent__";
@@ -19,7 +22,7 @@ function BlogPost() {
   if (post === undefined) {
     return (
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "3rem 1.5rem", textAlign: "center", color: "var(--text-muted)" }}>
-        Yükleniyor...
+        {t("loading")}
       </div>
     );
   }
@@ -28,8 +31,8 @@ function BlogPost() {
     return (
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "3rem 1.5rem", textAlign: "center", color: "var(--text-muted)" }}>
         <p style={{ fontSize: "2rem" }}>404</p>
-        <p>Yazı bulunamadı.</p>
-        <Link href="/" style={{ color: "var(--accent)" }}>Ana sayfaya dön</Link>
+        <p>{t("post_not_found")}</p>
+        <Link href="/" style={{ color: "var(--accent)" }}>{t("go_home")}</Link>
       </div>
     );
   }
@@ -50,7 +53,7 @@ function BlogPost() {
           transition: "color 0.15s",
         }}
       >
-        ← Geri dön
+        {t("back")}
       </Link>
 
       <div className="fade-up fade-up-delay-1" style={{ marginBottom: "2.5rem" }}>
@@ -87,7 +90,7 @@ function BlogPost() {
         </h1>
 
         <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
-          {new Date(post.date).toLocaleDateString("tr-TR", {
+          {new Date(post.date).toLocaleDateString(dateLocale, {
             year: "numeric",
             month: "long",
             day: "numeric",
@@ -115,7 +118,7 @@ export default function BlogPage() {
   return (
     <Suspense fallback={
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "3rem 1.5rem", textAlign: "center", color: "var(--text-muted)" }}>
-        Yükleniyor...
+        Loading...
       </div>
     }>
       <BlogPost />

@@ -1,8 +1,11 @@
 "use client";
 import Link from "next/link";
 import { Post } from "@/lib/posts";
+import { useLocale } from "@/lib/locale-context";
 
 export default function PostCard({ post }: { post: Post }) {
+  const { t, locale } = useLocale();
+  const dateLocale = locale === "tr" ? "tr-TR" : "en-US";
   return (
     <Link
       href={`/blog?slug=${post.slug}`}
@@ -41,7 +44,7 @@ export default function PostCard({ post }: { post: Post }) {
           }}
         >
           <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
-            {new Date(post.date).toLocaleDateString("tr-TR", {
+            {new Date(post.date).toLocaleDateString(dateLocale, {
               year: "numeric",
               month: "long",
               day: "numeric",
@@ -92,7 +95,7 @@ export default function PostCard({ post }: { post: Post }) {
             fontWeight: 500,
           }}
         >
-          Okumaya devam et →
+          {t("read_more")}
         </div>
       </article>
     </Link>

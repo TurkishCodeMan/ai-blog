@@ -1,5 +1,9 @@
+"use client";
+import { useLocale } from "@/lib/locale-context";
+
 export default function Footer() {
   const year = new Date().getFullYear();
+  const { t } = useLocale();
   return (
     <footer
       style={{
@@ -11,7 +15,7 @@ export default function Footer() {
       }}
     >
       <p>
-        © {year} Blog &mdash; Tüm hakları saklıdır.
+        © {year} Blog &mdash; {t("footer_rights")}
       </p>
     </footer>
   );
