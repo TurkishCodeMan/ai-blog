@@ -13,23 +13,26 @@ export default function PostCard({ post }: { post: Post }) {
     >
       <article
         style={{
-          padding: "1.5rem",
-          borderRadius: 12,
+          padding: "1.4rem 1.6rem",
+          borderRadius: "var(--radius)",
           border: "1px solid var(--border)",
           backgroundColor: "var(--bg-card)",
-          transition: "all 0.2s",
+          transition: "all 0.2s ease",
           cursor: "pointer",
+          boxShadow: "var(--shadow-sm)",
+          position: "relative",
+          overflow: "hidden",
         }}
         onMouseEnter={(e) => {
           const el = e.currentTarget as HTMLElement;
           el.style.borderColor = "var(--accent)";
-          el.style.backgroundColor = "var(--bg-card-hover)";
+          el.style.boxShadow = "var(--shadow-md)";
           el.style.transform = "translateY(-2px)";
         }}
         onMouseLeave={(e) => {
           const el = e.currentTarget as HTMLElement;
           el.style.borderColor = "var(--border)";
-          el.style.backgroundColor = "var(--bg-card)";
+          el.style.boxShadow = "var(--shadow-sm)";
           el.style.transform = "translateY(0)";
         }}
       >
@@ -54,13 +57,14 @@ export default function PostCard({ post }: { post: Post }) {
             <span
               key={tag}
               style={{
-                fontSize: "0.72rem",
+                fontSize: "0.7rem",
                 padding: "2px 8px",
                 borderRadius: 20,
-                backgroundColor: "var(--accent-glow)",
-                color: "var(--accent-light)",
-                border: "1px solid rgba(124,106,247,0.3)",
-                fontWeight: 500,
+                backgroundColor: "var(--accent-tag)",
+                color: "var(--accent)",
+                border: "1px solid rgba(180,83,9,0.2)",
+                fontWeight: 600,
+                letterSpacing: "0.02em",
               }}
             >
               {tag}
@@ -71,28 +75,32 @@ export default function PostCard({ post }: { post: Post }) {
         {/* Title */}
         <h2
           style={{
-            color: "#fff",
+            color: "var(--text)",
             fontWeight: 700,
-            fontSize: "1.15rem",
-            marginBottom: "0.4rem",
-            letterSpacing: "-0.01em",
+            fontSize: "1.1rem",
+            marginBottom: "0.45rem",
+            letterSpacing: "-0.015em",
+            lineHeight: 1.35,
           }}
         >
           {post.title}
         </h2>
 
         {/* Excerpt */}
-        <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", margin: 0 }}>
+        <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0, lineHeight: 1.65 }}>
           {post.excerpt}
         </p>
 
         {/* Read more */}
         <div
           style={{
-            marginTop: "0.8rem",
-            fontSize: "0.85rem",
-            color: "var(--accent-light)",
-            fontWeight: 500,
+            marginTop: "1rem",
+            fontSize: "0.825rem",
+            color: "var(--accent)",
+            fontWeight: 600,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.25rem",
           }}
         >
           {t("read_more")}

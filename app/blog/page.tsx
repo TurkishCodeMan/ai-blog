@@ -62,13 +62,13 @@ function BlogPost() {
             <span
               key={tag}
               style={{
-                fontSize: "0.75rem",
+                fontSize: "0.72rem",
                 padding: "3px 10px",
                 borderRadius: 20,
-                backgroundColor: "var(--accent-glow)",
-                color: "var(--accent-light)",
-                border: "1px solid rgba(124,106,247,0.3)",
-                fontWeight: 500,
+                backgroundColor: "var(--accent-tag)",
+                color: "var(--accent)",
+                border: "1px solid rgba(180,83,9,0.2)",
+                fontWeight: 600,
               }}
             >
               {tag}
@@ -80,7 +80,7 @@ function BlogPost() {
           style={{
             fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
             fontWeight: 800,
-            color: "#fff",
+            color: "var(--text)",
             letterSpacing: "-0.03em",
             lineHeight: 1.2,
             marginBottom: "1rem",
@@ -89,7 +89,7 @@ function BlogPost() {
           {post.title}
         </h1>
 
-        <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
+        <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", marginBottom: "0.5rem" }}>
           {new Date(post.date).toLocaleDateString(dateLocale, {
             year: "numeric",
             month: "long",
@@ -97,7 +97,7 @@ function BlogPost() {
           })}
         </p>
 
-        <p style={{ color: "#a0a0b8", fontSize: "1.05rem", maxWidth: 600 }}>
+        <p style={{ color: "var(--text-soft)", fontSize: "1.05rem", maxWidth: 600 }}>
           {post.excerpt}
         </p>
       </div>

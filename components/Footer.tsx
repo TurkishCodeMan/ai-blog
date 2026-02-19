@@ -16,6 +16,8 @@ export default function Footer() {
     >
       <p>
         © {year} Blog &mdash; {t("footer_rights")}
+        <br />
+        <strong>huseyinaltikulac4@gmail.com</strong>
       </p>
     </footer>
   );
