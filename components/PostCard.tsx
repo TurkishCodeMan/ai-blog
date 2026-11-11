@@ -62,7 +62,7 @@ export default function PostCard({ post }: { post: Post }) {
                 borderRadius: 20,
                 backgroundColor: "var(--accent-tag)",
                 color: "var(--accent)",
-                border: "1px solid rgba(180,83,9,0.2)",
+                border: "1px solid rgba(var(--accent-rgb),0.2)",
                 fontWeight: 600,
                 letterSpacing: "0.02em",
               }}

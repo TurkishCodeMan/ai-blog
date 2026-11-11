@@ -45,7 +45,7 @@ export default function HomePage() {
                 fontWeight: 600,
                 padding: "3px 10px",
                 borderRadius: 20,
-                border: "1px solid rgba(180,83,9,0.22)",
+                border: "1px solid rgba(var(--accent-rgb),0.22)",
                 color: "var(--accent)",
                 backgroundColor: "var(--accent-tag)",
                 letterSpacing: "0.03em",

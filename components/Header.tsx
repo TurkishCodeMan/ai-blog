@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale } from "@/lib/locale-context";
@@ -6,6 +7,18 @@ import { useLocale } from "@/lib/locale-context";
 export default function Header() {
   const pathname = usePathname();
   const { t, locale, setLocale } = useLocale();
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  useEffect(() => {
+    setTheme(document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark");
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch {}
+  };
 
   const navLinks = [
     { href: "/", label: t("nav_blog") },
@@ -17,7 +30,7 @@ export default function Header() {
       style={{
         borderBottom: "1px solid var(--border)",
         backdropFilter: "blur(12px)",
-        backgroundColor: "rgba(245,241,235,0.9)",
+        backgroundColor: "rgba(var(--bg-rgb),0.8)",
         position: "sticky",
         top: 0,
         zIndex: 100,
@@ -104,7 +117,7 @@ export default function Header() {
               cursor: "pointer",
               color: "var(--accent)",
               backgroundColor: "var(--accent-glow)",
-              border: "1px solid rgba(180,83,9,0.25)",
+              border: "1px solid rgba(var(--accent-rgb),0.25)",
               marginLeft: "0.2rem",
               letterSpacing: "0.06em",
               transition: "all 0.15s",
@@ -113,6 +126,18 @@ export default function Header() {
             {locale === "tr" ? "EN" : "TR"}
           </button>
 
+          <button
+            onClick={toggleTheme}
+            className="theme-toggle"
+            aria-label={theme === "dark" ? "Açık temaya geç" : "Koyu temaya geç"}
+            title={theme === "dark" ? "Açık tema" : "Koyu tema"}
+          >
+            {theme === "dark" ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
+            )}
+          </button>
         </nav>
       </div>
     </header>
