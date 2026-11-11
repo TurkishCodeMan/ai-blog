@@ -6,10 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prebuild": "node scripts/build-posts.mjs",
+    "predev": "node scripts/build-posts.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.97.0",
     "date-fns": "^4.1.0",
     "gray-matter": "^4.0.3",
     "next": "15.3.0",

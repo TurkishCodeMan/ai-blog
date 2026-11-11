@@ -14,6 +14,10 @@ pnpm dev
 bun dev
 ```
 
+## Yazı eklemek
+
+`posts/` klasörüne frontmatter'lı (`title`, `date`, `excerpt`, `tags`, `published`) bir `.md` dosyası ekle. Dosya adı slug olur. Build öncesi `scripts/build-posts.mjs` bunları okur.
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
