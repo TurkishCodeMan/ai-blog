@@ -41,10 +41,12 @@ export default function Header() {
           style={{
             textDecoration: "none",
             display: "flex",
-            flexDirection: "column",
-            gap: "0.1rem",
+            alignItems: "center",
+            gap: "0.75rem",
           }}
         >
+          <span className="brand-mark" aria-hidden="true">H</span>
+          <span style={{ display: "flex", flexDirection: "column", gap: "0.1rem" }}>
           <span
             style={{
               fontWeight: 700,
@@ -65,6 +67,7 @@ export default function Header() {
             }}
           >
             AI Engineer · Software Developer · AI Researcher
+          </span>
           </span>
         </Link>
 
